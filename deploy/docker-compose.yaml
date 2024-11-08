@@ -1,0 +1,55 @@
+version: '3'
+services:
+  app:
+    image: gcr.io/ucdlib-pubreg/app-manifest:dev
+    env_file:
+      - .env
+    ports:
+      - ${APP_HOST_PORT:-3000}:${APP_CONTAINER_PORT:-3000}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "2"
+    depends_on:
+      - db
+    environment:
+      APP_SERVER_LOG_FORMAT: ${APP_SERVER_LOG_FORMAT:-json}
+    restart: always
+    command: ./start-server.sh
+  init:
+    image: gcr.io/ucdlib-pubreg/app-manifest:dev
+    env_file:
+      - .env
+    depends_on:
+      - db
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /etc/service-account.json
+      GC_BACKUP_BUCKET: 
+      BACKUP_FILE_NAME: db.sql.gz
+    volumes:
+      - ../gc-reader-key.json:/etc/service-account.json
+    command: ./deploy-utils/init/init.sh
+  backup:
+    image: gcr.io/ucdlib-pubreg/app-manifest:dev
+    env_file:
+      - .env
+    depends_on:
+      - db
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /etc/service-account.json
+      GC_BACKUP_BUCKET: 
+      BACKUP_FILE_NAME: db.sql.gz
+    volumes:
+      - ../gc-writer-key.json:/etc/service-account.json
+    restart: always
+    command: ./deploy-utils/backup/entrypoint.sh
+  db:
+    image: postgres:17
+    env_file:
+      - .env
+    restart: always
+    volumes:
+      - db-data:/var/lib/postgresql/data
+volumes:
+  db-data:

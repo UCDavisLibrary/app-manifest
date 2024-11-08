@@ -1,0 +1,22 @@
+.field-help {
+  font-size: .875rem;
+  color: #13639e;
+}
+.radio .option-description, .checkbox .option-description {
+  padding-left: 2.5rem;
+  font-weight: 400;
+  font-size: .875rem;
+  margin-bottom: .5rem;
+}
+.radio--horizontal {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+.field-container {
+  margin-bottom: 1rem !important;
+}
+input:disabled {
+  background-color: #f0f0f0;
+  opacity: .4;
+}
