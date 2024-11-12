@@ -18,8 +18,6 @@ export default class AppPageApplicationRegister extends Mixin(LitElement)
     this.render = render.bind(this);
 
     this.application = new CorkModelController(this, 'ApplicationModel', []);
-
-    this._injectModel('ApplicationModel');
   }
 
   async _onAppStateUpdate(state) {
@@ -34,10 +32,6 @@ export default class AppPageApplicationRegister extends Mixin(LitElement)
 
     this.AppStateModel.showLoaded(this.pageId);
 
-  }
-
-  _onApplicationCreateUpdate(e){
-    console.log(e);
   }
 
 }

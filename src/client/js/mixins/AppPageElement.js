@@ -10,8 +10,6 @@ export default (superClass) => class extends superClass {
   constructor() {
     super();
     this._injectModel('AppStateModel');
-
-    this.validation = new ValidationContoller(this);
   }
 
   // disable the shadow dom

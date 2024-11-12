@@ -11,6 +11,28 @@ export default class BaseServiceImp extends BaseService {
     super();
   }
 
+  async clearCache(serviceResponse){
+    if ( !this.storeCaches?.length ) return;
+    if ( !serviceResponse ) {
+      this.storeCaches.forEach(store => store.purge());
+      return;
+    };
+    if ( response instanceof Promise ) {
+      response = await response;
+    } else if ( response?.request instanceof Promise ) {
+      await response.request;
+      if ( !response.id ){
+        this.logger.warn(`Unable to clear cache. Response does not have an id`, response);
+      } else if ( !response.store ){
+        this.logger.warn(`Unable to clear cache. Response does not have a store`, response);
+      }
+      response = response.store.get(response.id);
+    }
+    if ( response?.state === 'loaded' ){
+      this.storeCaches.forEach(store => store.purge());
+    }
+  }
+
   /**
    * @description Adds auth headers to request before calling super.request
    * @param {Object} options - request options

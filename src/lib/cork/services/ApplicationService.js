@@ -12,7 +12,7 @@ class ApplicationService extends BaseService {
     this.createId = 1;
   }
 
-  async create(data){
+  create(data){
     let id = this.createId++;
     let request = this.request({
       url: this.basePath,
@@ -26,8 +26,7 @@ class ApplicationService extends BaseService {
         this.store.data.create
       )
     });
-
-    return {id, request};
+    return {id, request, store: this.store.data.create};
   }
 
 }
