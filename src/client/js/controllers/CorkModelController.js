@@ -167,7 +167,8 @@ export default class CorkModelController {
     let response = this.model[method](...args);
     if ( response instanceof Promise ) {
       response = await response;
-    } else if ( response?.request instanceof Promise ) {
+    }
+    if ( response?.request instanceof Promise ) {
       await response.request;
       if ( !response.id ){
         this.logger.error(`_callModelMethod ${method} response missing id`, response);

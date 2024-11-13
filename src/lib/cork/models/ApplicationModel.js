@@ -17,7 +17,9 @@ class ApplicationModel extends BaseModel {
     return this.service.create(data);
   }
 
-  query(){}
+  async query(queryObject={}){
+    return await this.service.query(queryObject);
+  }
 
 }
 

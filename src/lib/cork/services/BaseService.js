@@ -17,18 +17,19 @@ export default class BaseServiceImp extends BaseService {
       this.storeCaches.forEach(store => store.purge());
       return;
     };
-    if ( response instanceof Promise ) {
-      response = await response;
-    } else if ( response?.request instanceof Promise ) {
-      await response.request;
-      if ( !response.id ){
-        this.logger.warn(`Unable to clear cache. Response does not have an id`, response);
-      } else if ( !response.store ){
-        this.logger.warn(`Unable to clear cache. Response does not have a store`, response);
-      }
-      response = response.store.get(response.id);
+    if ( serviceResponse instanceof Promise ) {
+      serviceResponse = await serviceResponse;
     }
-    if ( response?.state === 'loaded' ){
+    if ( serviceResponse?.request instanceof Promise ) {
+      await serviceResponse.request;
+      if ( !serviceResponse.id ){
+        this.logger.warn(`Unable to clear cache. Response does not have an id`, serviceResponse);
+      } else if ( !serviceResponse.store ){
+        this.logger.warn(`Unable to clear cache. Response does not have a store`, serviceResponse);
+      }
+      serviceResponse = serviceResponse.store.get(serviceResponse.id);
+    }
+    if ( serviceResponse?.state === 'loaded' ){
       this.storeCaches.forEach(store => store.purge());
     }
   }
