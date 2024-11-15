@@ -26,6 +26,24 @@ class Application extends BaseModel {
           required: true,
           charLimit: 200
         }
+      },
+      {
+        dbName: 'description',
+        validation: {
+          charLimit: 1000
+        }
+      },
+      {
+        dbName: 'maintenance_interval',
+        validation: {
+          type: 'non-negative-integer'
+        }
+      },
+      {
+        dbName: 'next_maintenance',
+        validation: {
+          type: 'iso-date'
+        }
       }
     ]);
   }
@@ -35,6 +53,21 @@ class Application extends BaseModel {
 
     const pageSize = config.getPageSize('application');
     const whereArgs = {'1': '1'};
+
+    if ( queryObject.keyword ){
+      whereArgs.keyword = {
+        relation: 'OR',
+        name: {
+          operator: 'ILIKE',
+          value: `%${queryObject.keyword}%`
+        },
+        description: {
+          operator: 'ILIKE',
+          value: `%${queryObject.keyword}%`
+        }
+      }
+    }
+
     const whereClause = pg.toWhereClause(whereArgs);
 
     const countSql = `

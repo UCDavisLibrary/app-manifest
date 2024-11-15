@@ -56,6 +56,17 @@ class TypeTransform {
   }
 
   /**
+   * @description Wrap value in an array if it is not already an array
+   * @param {*} value
+   * @returns {Array}
+   */
+  toArray(value) {
+    if ( !value ) return [];
+    if ( Array.isArray(value) ) return value;
+    return [value];
+  }
+
+  /**
    * @description Split a string into an array of values and optionally convert to integers
    * @param {String} value - the value to split
    * @param {Boolean} asInt - if true, convert to integers

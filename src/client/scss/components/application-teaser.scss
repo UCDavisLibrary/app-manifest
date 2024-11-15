@@ -1,0 +1,21 @@
+application-teaser {
+  container: application-teaser / inline-size;
+  display: block;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-left: 1px solid #ffbf00;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+
+
+}
+
+@container application-teaser (min-width: 500px) {
+  .title-row {
+    display: flex;
+    justify-content: space-between;
+
+    .title {
+      margin-right: 1rem;
+    }
+  }
+}

@@ -2,6 +2,8 @@ import BaseService from './BaseService.js';
 import { digest } from '@ucd-lib/cork-app-utils';
 import ApplicationStore from '../stores/ApplicationStore.js';
 import { appConfig } from '../../appGlobals.js';
+import objectUtils from '../../utils/objectUtils.js';
+import qs from 'qs';
 
 class ApplicationService extends BaseService {
 
@@ -34,14 +36,14 @@ class ApplicationService extends BaseService {
   }
 
   async query(queryObj={}){
-    if ( !queryObj.page ) queryObj.page = 1;
+    if ( !queryObj.page ) queryObj.page = '1';
     let id = await digest(queryObj);
     const store = this.store.data.query;
 
     let request = this.checkRequesting(
       id, store,
       () => this.request({
-        url : this.basePath,
+        url : `${this.basePath}?${qs.stringify(objectUtils.kebabCaseKeys(queryObj))}`,
         checkCached: () => store.get(id),
         onUpdate: resp => this.store.set(
           {...resp, id},

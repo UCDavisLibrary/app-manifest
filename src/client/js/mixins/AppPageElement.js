@@ -1,5 +1,4 @@
 import appRoutes from "../../../lib/utils/appRoutes.js";
-import ValidationContoller from "../controllers/ValidationController.js";
 
 /**
  * @description Mixin for app page elements

@@ -122,7 +122,9 @@ export default class Validator {
       'number': this.isNumber,
       'integer': this.isInteger,
       'positive-integer': this.isPositiveInteger,
+      'non-negative-integer': this.isNonNegativeInteger,
       'positive-number': this.isPositiveNumber,
+      'non-negative-number': this.isNonNegativeNumber,
       'boolean': this.isBoolean,
       'iso-date': this.isIsoDate,
       'iso-datetime': this.isIsoDatetime
@@ -132,6 +134,7 @@ export default class Validator {
     }
 
     if ( this.fieldHasError(field, 'required') ) return;
+    if ( value === undefined || value === null ) return;
 
     const { errorType } = this.errorTypes.invalidType;
     const message = `This field must be a ${fieldType}`;
@@ -182,6 +185,15 @@ export default class Validator {
   }
 
   /**
+   * @description Check if value is a non-negative integer
+   * @param {*} value
+   * @returns
+   */
+  isNonNegativeInteger(value){
+    return this.isInteger(value) && value >= 0;
+  }
+
+  /**
    * @description Check if value is a positive number
    * @param {*} value
    * @returns
@@ -190,6 +202,17 @@ export default class Validator {
     if ( !this.isNumber(value) ) return false;
     value = Number(value);
     return value > 0;
+  }
+
+  /**
+   * @description Check if value is a non-negative number
+   * @param {*} value
+   * @returns
+   */
+  isNonNegativeNumber(value){
+    if ( !this.isNumber(value) ) return false;
+    value = Number(value);
+    return value >= 0;
   }
 
   /**

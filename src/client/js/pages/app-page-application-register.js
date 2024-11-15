@@ -3,6 +3,7 @@ import { render } from "./app-page-application-register.tpl.js";
 import { LitCorkUtils, Mixin } from '@ucd-lib/cork-app-utils';
 import AppPageElement from '../mixins/AppPageElement.js';
 import CorkModelController from '../controllers/CorkModelController.js';
+import IdGenerator from '../../../lib/utils/IdGenerator.js';
 
 export default class AppPageApplicationRegister extends Mixin(LitElement)
   .with(LitCorkUtils, AppPageElement) {
@@ -16,6 +17,8 @@ export default class AppPageApplicationRegister extends Mixin(LitElement)
   constructor() {
     super();
     this.render = render.bind(this);
+
+    this.idGen = new IdGenerator({pageEle: this});
 
     this.application = new CorkModelController(this, 'ApplicationModel', []);
   }
