@@ -56,15 +56,13 @@ function renderFilters(){
         <div class='l-second'>
           <div class='field-container'>
             <label for=${this.igen.get('nextMaintenance')}>Next Maintenance</label>
-            <ucd-theme-slim-select @change=${e => this.query.set('nextMaintenance', e.detail.map(i => i.value))}>
-              <select id=${this.igen.get('nextMaintenance')} multiple>
+              <select id=${this.igen.get('nextMaintenance')} @input=${e => this.query.set('nextMaintenance', e.target.value)}>
                 ${selectOptions.maintenanceIntervals.map(interval => html`
-                  <option value=${interval.value} ?selected=${this.query.getArray('nextMaintenance').includes(interval.value)}>
+                  <option value=${interval.value} ?selected=${this.query.equals('nextMaintenance', interval.value)}>
                     ${interval.label}
                   </option>
                   `)}
               </select>
-
             </ucd-theme-slim-select>
           </div>
         </div>

@@ -40,6 +40,36 @@ export default class QueryController {
   }
 
   /**
+   * @description Check if a query string parameter is equal to a value
+   * @param {String} prop - property name as camel case
+   * @param {*} value - value to compare
+   * @param {Boolean} strict - if true, use strict equality
+   * @returns {Boolean}
+   */
+  equals(prop, value, strict=false) {
+    if( strict ) {
+      return this.payload[prop] === value;
+    }
+    return this.payload[prop] == value;
+  }
+
+  /**
+   * @description Check if a query string parameter array includes a value
+   * @param {String} prop - property name as camel case
+   * @param {*} value - value to check
+   * @param {Boolean} asString - Convert all values to strings before comparing
+   * @returns {Boolean}
+   */
+  includes(prop, value, asString) {
+    if ( asString ){
+      value = String(value);
+      const arr = this.getArray(prop).map(v => String(v));
+      return arr.includes(value);
+    }
+    return this.getArray(prop).includes(value);
+  }
+
+  /**
    * @description Set a query string parameter. Will trigger an app state update.
    * @param {String} prop - property name as camel case
    * @param {*} value - value to set

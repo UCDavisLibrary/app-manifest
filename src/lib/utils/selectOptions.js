@@ -9,6 +9,10 @@ class SelectOptions {
   getSharedIntervals() {
     return [
       {
+        value: '',
+        label: 'All'
+      },
+      {
         value: 'past',
         label: 'Past',
         sql: {
@@ -54,6 +58,14 @@ class SelectOptions {
         sql: {
           operator: '>',
           value: `NOW() + INTERVAL '1 year'`
+        }
+      },
+      {
+        value: 'never',
+        label: 'Never',
+        sql: {
+          operator: 'IS',
+          value: 'NULL'
         }
       }
     ];

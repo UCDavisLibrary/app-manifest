@@ -1,5 +1,5 @@
 import { LitElement } from 'lit';
-import { render } from "./debounce-input.tpl.js";
+import { render, styles } from "./debounce-input.tpl.js";
 
 export default class DebounceInput extends LitElement {
 
@@ -13,6 +13,10 @@ export default class DebounceInput extends LitElement {
     super();
     this.render = render.bind(this);
     this.timeout = 500;
+  }
+
+  static get styles() {
+    return styles();
   }
 
   _onInput(e){

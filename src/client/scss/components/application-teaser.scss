@@ -6,16 +6,68 @@ application-teaser {
   border-left: 1px solid #ffbf00;
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
 
+  .title-row {
+    margin-bottom: 1rem;
+  }
+
+  .teaser-body{
+    display: block;
+
+    .separator {
+      display: none;
+    }
+
+    .body-section {
+      display: flex;
+      align-items: center;
+      flex-wrap: nowrap;
+      margin-bottom: 1rem;
+    }
+
+    .teaser-icon {
+      margin-right: 1rem;
+      color: #022851;
+    }
+
+    .date-grid {
+      display: grid;
+      grid-template-columns: auto auto;
+      row-gap: .5rem;
+      column-gap: 1rem;
+
+      :nth-child(odd) {
+        font-weight: bold;
+        color: #022851;
+      }
+    }
+  }
+
 
 }
 
 @container application-teaser (min-width: 500px) {
-  .title-row {
-    display: flex;
-    justify-content: space-between;
+  application-teaser {
+    .title-row {
+      display: flex;
+      justify-content: space-between;
 
-    .title {
-      margin-right: 1rem;
+      .title {
+        margin-right: 1rem;
+      }
     }
+
+    .teaser-body {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+
+      .separator {
+        display: block;
+        margin: 0 1rem;
+        background-color: #DBEAF7;
+        width: 2px;
+        height: 100%;
+      }
+    }
+
   }
 }

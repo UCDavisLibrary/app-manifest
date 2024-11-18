@@ -4,6 +4,7 @@ import BaseModel from "./BaseModel.js";
 import ApplicationValidations from './ApplicationValidations.js';
 import typeTransfrom from '../utils/typeTransform.js';
 import config from '../serverConfig.js';
+import selectOptions from "../utils/selectOptions.js";
 
 class Application extends BaseModel {
 
@@ -46,9 +47,39 @@ class Application extends BaseModel {
         }
       }
     ]);
+
+    this.queryArgs = new EntityFields([
+      {
+        dbName: 'page',
+        validation: {
+          type: 'positive-integer'
+        }
+      },
+      {
+        dbName: 'keyword',
+        validation: {
+          type: 'string',
+        }
+      },
+      {
+        dbName: 'next_maintenance',
+        validation: {
+          type: 'string',
+          custom: this.validations.nextMaintenance.bind(this.validations)
+        }
+      }
+    ]);
   }
 
   async query(queryObject={}){
+
+    // validate query
+    const parsedQuery = this.queryArgs.toDbObj(queryObject);
+    const validation = await this.queryArgs.validate(parsedQuery);
+    if ( !validation.valid ) {
+      return this.formatValidationError(validation);
+    }
+
     const page = typeTransfrom.toPositiveInt(queryObject.page) || 1;
 
     const pageSize = config.getPageSize('application');
@@ -70,11 +101,18 @@ class Application extends BaseModel {
 
     const whereClause = pg.toWhereClause(whereArgs);
 
+    if ( queryObject.nextMaintenance ){
+      const interval = selectOptions.maintenanceIntervals.find(interval => interval.value === queryObject.nextMaintenance);
+      if ( interval.sql ) {
+        whereClause.sql += ` AND next_maintenance ${interval.sql.operator} ${interval.sql.value}`;
+      }
+    }
+
     const countSql = `
       SELECT COUNT(*) as total
       FROM ${this.table} a
       WHERE ${whereClause.sql}
-    `
+    `;
     const countRes = await pg.query(countSql, whereClause.values);
     if ( countRes.error ) {
       return this.formatError(countRes.error);
