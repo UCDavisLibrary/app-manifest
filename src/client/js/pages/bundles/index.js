@@ -6,7 +6,7 @@
  */
 const defs = {
   all : [
-    'home', 'app-register', 'app-landing'
+    'home', 'app-register', 'app-landing', 'app-single'
   ],
   admin: [
     'admin-home', 'admin-settings'

@@ -23,6 +23,18 @@ import ValidationContoller from './ValidationController.js';
  *
  * // ----------------
  * // TO CREATE/UPDATE DATA
+ * const payload = this.foo.payload;
+ * <form @submit=${payload.create}>
+ *  ${ payload.validation.renderErrorMessage() }
+ *  <div class='field-container ${payload.validation.fieldErrorClass('name')}'>
+ *    <label>Application Name</label>
+ *    <input
+ *      type='text'
+ *      .value=${payload.get('name')}
+ *      @input=${e => payload.set('name', e.target.value)} />
+ *    ${ payload.validation.renderFieldErrorMessages('name') }
+ *  </div>
+ * </form>
  */
 export default class CorkModelController {
 
@@ -51,6 +63,7 @@ export default class CorkModelController {
       data: {},
       validation: new ValidationContoller(host),
       set: (...args) => this._setPayloadProperty(...args),
+      toggle: (...args) => this._togglePayloadProperty(...args),
       get: (...args) => this._getPayloadProperty(...args),
       clear: () => this._clearPayload(),
       create: async (e) => await this._submitPayload('create', e),
@@ -58,18 +71,42 @@ export default class CorkModelController {
     };
   }
 
+  /**
+   * @description Set the payload data and reset the validation errors
+   * Makes a deep copy of the data to avoid reference issues
+   * @param {Object} data
+   */
   setPayloadData(data){
     data = JSON.parse(JSON.stringify(data));
     this.payload.data = data;
     this.payload.validation.reset();
   }
 
+  /**
+   * @description Toggle a boolean property on the payload data
+   * @param {String} prop - The property name to toggle
+   */
+  _togglePayloadProperty(prop){
+    const value = !this.payload.data[prop];
+    this._setPayloadProperty(prop, value);
+  }
+
+  /**
+   * @description Set a property on the payload data and request a host update
+   * @param {String} prop - The property name to set
+   * @param {*} value - The value to set
+   */
   _setPayloadProperty(prop, value){
     this.payload.data[prop] = value;
     this.payload.validation.clearErrorByField(prop);
     this.host.requestUpdate();
   }
 
+  /**
+   * @description Get a property from the payload data or the default value
+   * @param {String} prop - The property name to get
+   * @returns {*} The property value
+   */
   _getPayloadProperty(prop){
     if ( this.payload.data[prop] !== undefined ) {
       return this.payload.data[prop];
@@ -77,11 +114,20 @@ export default class CorkModelController {
     return this.payloadConfig?.defaults?.[prop] || '';
   }
 
+  /**
+   * @description Clear the payload data and reset any validation errors
+   */
   _clearPayload(){
     this.payload.data = {};
     this.payload.validation.reset();
   }
 
+  /**
+   * @description Submit the payload data to the model to be created or updated
+   * @param {String} method - 'create' or 'update'
+   * @param {*} submitEvent - The form submit event. Optional.
+   * @returns
+   */
   async _submitPayload(method='create', submitEvent){
     if ( submitEvent ) {
       submitEvent?.preventDefault?.();

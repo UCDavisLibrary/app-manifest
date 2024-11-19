@@ -18,5 +18,15 @@ export default (api) => {
     res.json(result);
   });
 
+  api.get(`${basePath}/:id`, async (req, res) => {
+    if ( apiUtils.returnIfMissingId(res, req.params.id, 'Application does not exist') ) return;
+    const result = await applicationModel.query({applicationId: req.params.id});
+    if ( apiUtils.returnIfModelError(req, res, result, 'Unable to get application record') ) return;
+    if ( !result.data.length ) {
+      return apiUtils.return404(res, 'Application does not exist');
+    }
+    res.json(result.data[0]);
+  });
+
 
 };

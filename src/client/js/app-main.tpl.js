@@ -43,6 +43,7 @@ return html`
     <app-page-admin-settings page-id='admin-settings'></app-page-admin-settings>
     <app-page-application-landing page-id='app-landing'></app-page-application-landing>
     <app-page-application-register page-id='app-register'></app-page-application-register>
+    <app-page-application page-id='app-single'></app-page-application>
   </ucdlib-pages>
   <app-dialog-modal></app-dialog-modal>
   <app-toast></app-toast>

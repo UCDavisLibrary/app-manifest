@@ -26,4 +26,13 @@ export default class ApplicationValidations {
       validator.addError(field, 'invalid', 'Invalid maintenance interval');
     }
   }
+
+  sslExpiration(field, value, validator){
+    if ( validator.fieldHasError(field) ) return;
+    if ( value === undefined || value === null ) return;
+
+    if ( !selectOptions.sslExpirationIntervals.find(interval => interval.value === value) ) {
+      validator.addError(field, 'invalid', 'Invalid SSL expiration interval');
+    }
+  }
 }

@@ -32,7 +32,7 @@ export function render() {
               <div class='l-2col grid--simple-override'>
                 <div class="l-first">
                   <div class='field-container ${payload.validation.fieldErrorClass('maintenanceInterval')}'>
-                    <label for=${this.idGen.get('maintenanceInterval')}>Interval</label>
+                    <label for=${this.idGen.get('maintenanceInterval')}>Interval (in Months)</label>
                     <input
                       id=${this.idGen.get('maintenanceInterval')}
                       type='number'
@@ -42,15 +42,21 @@ export function render() {
                   </div>
                 </div>
                 <div class='l-second'>
-                  <div class='field-container ${payload.validation.fieldErrorClass('nextMaintenance')}'>
-                    <label for=${this.idGen.get('nextMaintenance')}>Next Maintenance</label>
-                    <input
-                      id=${this.idGen.get('nextMaintenance')}
-                      type='date'
-                      .value=${payload.get('nextMaintenance')}
-                      @input=${e => payload.set('nextMaintenance', e.target.value)} />
-                    ${ payload.validation.renderFieldErrorMessages('nextMaintenance') }
-                  </div>
+                  ${renderInput.call(this, 'nextMaintenance', 'Next Maintenance', 'date')}
+                </div>
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend>SSL Cert Expiration</legend>
+              ${renderInput.call(this, 'sslCertExpiration', 'Expiration Date', 'date')}
+              <div class='field-container ${payload.validation.fieldErrorClass('certCheckDisabled')}'>
+                <div class='checkbox'>
+                  <input
+                    id=${this.idGen.get('certCheckDisabled')}
+                    type='checkbox'
+                    .checked=${payload.get('certCheckDisabled')}
+                    @input=${e => payload.toggle('certCheckDisabled')} />
+                  <label for=${this.idGen.get('certCheckDisabled')}>Disable SSL Cert Check</label>
                 </div>
               </div>
             </fieldset>
@@ -61,3 +67,18 @@ export function render() {
       </div>
     </div>
   `;}
+
+  function renderInput(prop, label, inputType='text'){
+    const payload = this.application.payload;
+    return html`
+      <div class='field-container ${payload.validation.fieldErrorClass(prop)}'>
+        <label for=${this.idGen.get(prop)}>${label}</label>
+        <input
+          id=${this.idGen.get(prop)}
+          type=${inputType}
+          .value=${payload.get(prop)}
+          @input=${e => payload.set(prop, e.target.value)} />
+        ${ payload.validation.renderFieldErrorMessages(prop) }
+      </div>
+    `;
+  }

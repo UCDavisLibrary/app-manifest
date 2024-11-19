@@ -12,7 +12,10 @@ class ApplicationService extends BaseService {
     this.store = ApplicationStore;
     this.basePath = `${appConfig.apiRoot}/application`;
     this.createId = 1;
-    this.storeCaches = [this.store.data.query];
+    this.storeCaches = [
+      this.store.data.query,
+      this.store.data.get
+    ];
   }
 
   create(data){
@@ -33,6 +36,25 @@ class ApplicationService extends BaseService {
     const r = {id, request, store};
     this.clearCache(r);
     return r;
+  }
+
+  async get(id){
+    const store = this.store.data.get;
+
+    await this.checkRequesting(
+      id, store,
+      () => this.request({
+        url : `${this.basePath}/${id}`,
+        checkCached: () => store.get(id),
+        onUpdate: resp => this.store.set(
+          {...resp, id},
+          store
+        )
+      })
+    );
+
+    return store.get(id);
+
   }
 
   async query(queryObj={}){

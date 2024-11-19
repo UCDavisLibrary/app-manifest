@@ -2,9 +2,14 @@ import { html } from 'lit';
 
 export function render() {
 return html`
+  <div class='badges'>
+    ${this.badges.map(badge => html`
+      <div class='badge ${badge.type ? `badge--${badge.type}` : ''}'>${badge.text}</div>
+    `)}
+  </div>
   <div class='title-row'>
     <div class='title'>
-      <h2 class='heading--highlight'>${this.application.name}</h2>
+      <a href=${this.pageUrl}><h2 class='heading--highlight'>${this.application.name}</h2></a>
     </div>
   </div>
   <div class='teaser-body'>
@@ -13,10 +18,10 @@ return html`
         <i class='fa-solid fa-calendar'></i>
       </div>
       <div class='date-grid'>
-        <div>Next Maintenance</div>
-        <div>yyyy-mm-dd</div>
-        <div>SSL Cert Expiration</div>
-        <div>yyyy-mm-dd</div>
+        <div>Next Maintenance:</div>
+        <div>${this.maintenanceDate}</div>
+        <div>SSL Cert Expiration:</div>
+        <div>${this.sslCertExpiration}</div>
       </div>
     </div>
     <div class='separator'></div>

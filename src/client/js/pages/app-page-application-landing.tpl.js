@@ -54,19 +54,27 @@ function renderFilters(){
           </div>
         </div>
         <div class='l-second'>
-          <div class='field-container'>
-            <label for=${this.igen.get('nextMaintenance')}>Next Maintenance</label>
-              <select id=${this.igen.get('nextMaintenance')} @input=${e => this.query.set('nextMaintenance', e.target.value)}>
-                ${selectOptions.maintenanceIntervals.map(interval => html`
-                  <option value=${interval.value} ?selected=${this.query.equals('nextMaintenance', interval.value)}>
-                    ${interval.label}
-                  </option>
-                  `)}
-              </select>
-            </ucd-theme-slim-select>
-          </div>
+          ${renderSelect.call(this, 'nextMaintenance', 'Next Maintenance', selectOptions.maintenanceIntervals)}
+        </div>
+        <div class='l-third'>
+          ${renderSelect.call(this, 'sslExpiration', 'SSL Expiration', selectOptions.sslExpirationIntervals)}
         </div>
       </div>
+    </div>
+  `;
+}
+
+function renderSelect(prop, label, options){
+  return html`
+    <div class='field-container'>
+      <label for=${this.igen.get(prop)}>${label}</label>
+      <select id=${this.igen.get(prop)} @input=${e => this.query.set(prop, e.target.value)}>
+        ${options.map(option => html`
+          <option value=${option.value} ?selected=${this.query.equals(prop, option.value)}>
+            ${option.label}
+          </option>
+        `)}
+      </select>
     </div>
   `;
 }

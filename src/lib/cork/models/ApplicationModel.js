@@ -13,6 +13,10 @@ class ApplicationModel extends BaseModel {
     this.register('ApplicationModel');
   }
 
+  get(id){
+    return this.service.get(id);
+  }
+
   create(data){
     return this.service.create(data);
   }

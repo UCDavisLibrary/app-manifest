@@ -70,6 +70,18 @@ export default class QueryController {
   }
 
   /**
+   * @description Toggle a boolean query string parameter
+   * @param {String} prop
+   */
+  toggle(prop){
+    if( this.get(prop) ) {
+      this.set(prop, null);
+    } else {
+      this.set(prop, true);
+    }
+  }
+
+  /**
    * @description Set a query string parameter. Will trigger an app state update.
    * @param {String} prop - property name as camel case
    * @param {*} value - value to set

@@ -41,6 +41,7 @@ CREATE TABLE application (
     maintenance_interval INTEGER,
     next_maintenance DATE,
     ssl_cert_expiration DATE,
+    cert_check_disabled BOOLEAN DEFAULT FALSE,
     status_update_failure BOOLEAN DEFAULT FALSE,
     is_archived BOOLEAN DEFAULT FALSE
 );

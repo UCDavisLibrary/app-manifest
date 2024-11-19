@@ -1,9 +1,16 @@
 class SelectOptions {
 
   get maintenanceIntervals() {
-    const is = this.getSharedIntervals();
-    is.find(i => i.value === 'past').label = 'Overdue';
-    return is;
+    const si = this.getSharedIntervals();
+    si.find(i => i.value === 'past').label = 'Overdue';
+    return si;
+  }
+
+  get sslExpirationIntervals() {
+    const si = this.getSharedIntervals();
+    si.find(i => i.value === 'past').label = 'Expired';
+    si.find(i => i.value === 'never').label = 'Unknown';
+    return si;
   }
 
   getSharedIntervals() {

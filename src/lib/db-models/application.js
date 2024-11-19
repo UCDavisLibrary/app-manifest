@@ -45,6 +45,18 @@ class Application extends BaseModel {
         validation: {
           type: 'iso-date'
         }
+      },
+      {
+        dbName: 'ssl_cert_expiration',
+        validation: {
+          type: 'iso-date'
+        }
+      },
+      {
+        dbName: 'cert_check_disabled',
+        validation: {
+          type: 'boolean'
+        }
       }
     ]);
 
@@ -66,6 +78,19 @@ class Application extends BaseModel {
         validation: {
           type: 'string',
           custom: this.validations.nextMaintenance.bind(this.validations)
+        }
+      },
+      {
+        dbName: 'ssl_expiration',
+        validation: {
+          type: 'string',
+          custom: this.validations.sslExpiration.bind(this.validations)
+        }
+      },
+      {
+        dbName: 'application_id',
+        validation: {
+          type: 'positive-integer'
         }
       }
     ]);
@@ -99,12 +124,23 @@ class Application extends BaseModel {
       }
     }
 
+    if ( queryObject.applicationId ){
+      whereArgs.application_id = queryObject.applicationId;
+    }
+
     const whereClause = pg.toWhereClause(whereArgs);
 
     if ( queryObject.nextMaintenance ){
       const interval = selectOptions.maintenanceIntervals.find(interval => interval.value === queryObject.nextMaintenance);
       if ( interval.sql ) {
         whereClause.sql += ` AND next_maintenance ${interval.sql.operator} ${interval.sql.value}`;
+      }
+    }
+
+    if ( queryObject.sslExpiration ){
+      const interval = selectOptions.sslExpirationIntervals.find(interval => interval.value === queryObject.sslExpiration);
+      if ( interval.sql ) {
+        whereClause.sql += ` AND ssl_cert_expiration ${interval.sql.operator} ${interval.sql.value}`;
       }
     }
 

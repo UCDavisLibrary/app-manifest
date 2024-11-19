@@ -81,18 +81,30 @@ class ApiUtils {
   }
 
   /**
-   * @description Return a 400 response if an id is missing or not a positive integer
+   * @description Return response if an id is missing or not a positive integer
    * @param {*} res - Express response object
    * @param {String|Number} id - Id to check
    * @param {String} errorMessage - Custom Error message to display to the user (optional)
    * @param {String} errorHeading - Custom Error heading to display to the user (optional)
    * @returns
    */
-  return400IfMissingId(res, id, errorMessage, errorHeading){
+  returnIfMissingId(res, id, statusCode, errorMessage, errorHeading){
     errorMessage = errorMessage || 'Missing id';
+    statusCode = statusCode || 400;
     if ( !typeTransform.toPositiveInt(id) ){
-      return res.status(400).json({errorMessage, errorHeading});
+      return res.status(statusCode).json({errorMessage, errorHeading});
     }
+  }
+
+  /**
+   * @description Return a 404 response
+   * @param {*} res - Express response object
+   * @param {*} errorMessage - Custom Error message to display to the user (optional)
+   * @param {*} errorHeading - Custom Error heading to display to the user (optional)
+   * @returns
+   */
+  return404(res, errorMessage, errorHeading){
+    return res.status(404).json({errorMessage, errorHeading});
   }
 
 }

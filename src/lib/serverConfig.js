@@ -18,7 +18,8 @@ class ServerConfig {
       {routeId: 'admin-home', pageId: 'admin-home', pageTitle: 'Application Administration', breadcrumbText: 'Admin', pathSegment: 'admin', parent: null},
       {routeId: 'admin-settings', pageId: 'admin-settings', pageTitle: 'General Settings', breadcrumbText: 'General Settings', pathSegment: 'settings', parent: 'admin-home'},
       {routeId: 'app-landing', pageId: 'app-landing', pageTitle: 'Applications', breadcrumbText: 'Applications', pathSegment: 'applications', parent: null},
-      {routeId: 'app-create', pageId: 'app-register', pageTitle: 'Register New Application', breadcrumbText: 'Register', pathSegment: 'register', parent: 'app-landing'}
+      {routeId: 'app-create', pageId: 'app-register', pageTitle: 'Register New Application', breadcrumbText: 'Register', pathSegment: 'register', parent: 'app-landing'},
+      {routeId: 'app-single', pageId: 'app-single', pageTitle: 'Application Details', breadcrumbText: 'Details', pathSegment: '*', parent: 'app-landing'}
     ];
     this.routeConfig = appRoutes.routes;
     this.routes = appRoutes.getSpaMiddleWareAppRoutes();

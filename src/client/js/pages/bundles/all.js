@@ -5,4 +5,5 @@
 
 import '../app-page-application-register.js';
 import '../app-page-application-landing.js';
+import '../app-page-application.js';
 
