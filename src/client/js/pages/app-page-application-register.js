@@ -10,7 +10,8 @@ export default class AppPageApplicationRegister extends Mixin(LitElement)
 
   static get properties() {
     return {
-
+      applicationId: {type: String},
+      isAnEdit: {type: Boolean}
     }
   }
 
@@ -20,21 +21,52 @@ export default class AppPageApplicationRegister extends Mixin(LitElement)
 
     this.idGen = new IdGenerator({pageEle: this});
 
-    this.application = new CorkModelController(this, 'ApplicationModel', []);
+    const ctlPropMapper = [
+      {property: 'data', method: 'get', defaultValue: {}}
+    ]
+    const ctlPayloadConfig = {
+      defaults: {
+        appUrls: [{href: '', label: ''}]
+      }
+    };
+    this.application = new CorkModelController(this, 'ApplicationModel', ctlPropMapper, ctlPayloadConfig);
   }
 
   async _onAppStateUpdate(state) {
     if ( this.pageId !== state.page ) return;
 
-    this.AppStateModel.showLoading();
-    this.showPageTitle();
-    this.showBreadcrumbs();
+    this.application.payload.clear();
 
-    //const d = await this.getPageData();
-    //if ( this.AppStateModel.showMessageIfServiceError(d) ) return;
+    this.isAnEdit = this.routeId === 'app-edit';
+    this.applicationId = state.location.path[1];
+
+    this.AppStateModel.showLoading();
+
+    const d = await this.getPageData();
+    if ( this.AppStateModel.showMessageIfServiceError(d) ) return;
+
+    let breadcrumbWildCards = [];
+    if ( this.isAnEdit ) {
+      breadcrumbWildCards = [{text: this.application.data.value.name, pathPart: this.applicationId}];
+      this.application.setPayloadData(this.application.data.value);
+    }
+
+    this.showPageTitle();
+    this.showBreadcrumbs(breadcrumbWildCards);
 
     this.AppStateModel.showLoaded(this.pageId);
 
+  }
+
+  /**
+   * @description Get any data required for rendering this page
+   */
+  async getPageData(){
+    const promises = [];
+    if ( this.isAnEdit ) {
+      promises.push(this.application.data.get( this.applicationId ));
+    }
+    return Promise.allSettled(promises);
   }
 
 }

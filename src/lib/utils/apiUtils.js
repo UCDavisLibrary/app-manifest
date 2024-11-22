@@ -96,6 +96,10 @@ class ApiUtils {
     }
   }
 
+  return404IfMissingId(res, id, errorMessage, errorHeading){
+    return this.returnIfMissingId(res, id, 404, errorMessage, errorHeading);
+  }
+
   /**
    * @description Return a 404 response
    * @param {*} res - Express response object

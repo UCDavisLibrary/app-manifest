@@ -38,6 +38,48 @@ class ApplicationService extends BaseService {
     return r;
   }
 
+  async update(data){
+    let id = data.applicationId;
+    const store = this.store.data.update;
+
+    await this.request({
+      url: `${this.basePath}/${id}`,
+      fetchOptions: {
+        method: 'PUT',
+        body: data
+      },
+      json: true,
+      onUpdate : resp => this.store.set(
+        {...resp, id},
+        store
+      )
+    });
+
+    const r = store.get(id);
+    this.clearCache(r);
+    return r;
+  }
+
+  async delete(id){
+    const store = this.store.data.delete;
+
+    await this.request({
+      url: `${this.basePath}/${id}`,
+      fetchOptions: {
+        method: 'DELETE'
+      },
+      json: true,
+      onUpdate : resp => this.store.set(
+        {...resp, id},
+        store
+      )
+    });
+
+    const r = store.get(id);
+    this.clearCache(r);
+    return r;
+  }
+
   async get(id){
     const store = this.store.data.get;
 

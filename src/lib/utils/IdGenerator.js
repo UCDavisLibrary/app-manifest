@@ -10,7 +10,9 @@ export default class IdGenerator {
 
     if ( opts?.pageEle ){
       this.prefix = `${opts.pageEle.pageId}--`;
-    }
+    } else if ( opts?.randomPrefix ){
+      this.prefix = `${IdGenerator.getRand('r')}--`;
+    };
   }
 
   static getRand(prefix=''){

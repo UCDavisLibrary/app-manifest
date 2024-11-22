@@ -12,6 +12,7 @@ class Application extends BaseModel {
     super();
     this.validations = new ApplicationValidations(this);
     this.table = "application";
+    this.metaTable = "application_metadata";
     this.entityFields = new EntityFields([
       {
         dbName: 'application_id',
@@ -57,6 +58,19 @@ class Application extends BaseModel {
         validation: {
           type: 'boolean'
         }
+      },
+      {
+        dbName: 'is_archived',
+        validation: {
+          type: 'boolean'
+        }
+      },
+      {
+        dbName: 'app_urls',
+        validation: {
+          type: 'array',
+          custom: this.validations.appUrls.bind(this.validations)
+        }
       }
     ]);
 
@@ -91,6 +105,29 @@ class Application extends BaseModel {
         dbName: 'application_id',
         validation: {
           type: 'positive-integer'
+        }
+      },
+      {
+        dbName: 'include_archived',
+        validation: {
+          type: 'boolean'
+        }
+      }
+    ]);
+
+    this.links = new EntityFields([
+      {
+        dbName: 'href',
+        validation: {
+          type: 'string',
+          required: true
+        }
+      },
+      {
+        dbName: 'label',
+        validation: {
+          type: 'string',
+          charLimit: 100
         }
       }
     ]);
@@ -128,6 +165,10 @@ class Application extends BaseModel {
       whereArgs.application_id = queryObject.applicationId;
     }
 
+    if ( !queryObject.includeArchived ){
+      whereArgs.is_archived = false;
+    }
+
     const whereClause = pg.toWhereClause(whereArgs);
 
     if ( queryObject.nextMaintenance ){
@@ -157,9 +198,13 @@ class Application extends BaseModel {
     const totalPages = Math.ceil(total/pageSize);
 
     const sql = `
-      SELECT a.*
+      SELECT
+        a.*,
+        json_agg(${this.metaJsonObject()}) as metadata
       FROM ${this.table} a
+      LEFT JOIN ${this.metaTable} am ON a.application_id = am.application_id
       WHERE ${whereClause.sql}
+      GROUP BY a.application_id
       ORDER BY a.name
       LIMIT ${pageSize} OFFSET ${(page-1)*pageSize}
     `;
@@ -168,9 +213,68 @@ class Application extends BaseModel {
       return this.formatError(res.error);
     }
 
-    const data = this.entityFields.toJsonArray(res.res.rows);
+    const data = res.res.rows.map(row => this._transformDbData(row));
     return {data, total, page, pageSize, totalPages};
 
+  }
+
+  metaJsonObject(tableAlias='am') {
+    return `json_build_object(
+      'applicationMetadataId', ${tableAlias}.application_metadata_id,
+      'applicationId', ${tableAlias}.application_id,
+      'key', ${tableAlias}.key,
+      'value', ${tableAlias}.value
+    )`;
+  }
+
+  _transformDbData(data){
+    const metadata = data.metadata || [];
+    delete data.metadata;
+
+    data = this.entityFields.toJsonObj(data);
+
+    data.appUrls = this.links.toJsonArray( metadata.filter(d => d.key === 'app_url').map(d => d.value) );
+
+    const dates = ['nextMaintenance', 'sslCertExpiration'];
+    for ( let date of dates ){
+      if ( data[date] ) data[date] = data[date].toISOString().split('T')[0];
+    }
+    return data;
+  }
+
+  async update(data){
+    const parsedData = this.entityFields.toDbObj(data);
+
+    const validation = await this.entityFields.validate(parsedData);
+    if ( !validation.valid ) {
+      return this.formatValidationError(validation);
+    }
+
+    const applicationId = parsedData.application_id;
+    delete parsedData.application_id;
+
+    const client = await pg.pool.connect();
+    try {
+      await client.query('BEGIN');
+      let update, sql, result;
+
+      update = pg.prepareObjectForUpdate(parsedData);
+      sql = `
+        UPDATE ${this.table}
+        SET ${update.sql}
+        WHERE application_id = $${update.values.length + 1}
+      `;
+      result = await client.query(sql, [...update.values, applicationId]);
+
+      await client.query('COMMIT');
+      return { application_id: applicationId };
+
+    } catch (error) {
+      await client.query('ROLLBACK');
+      return this.formatError(error);
+    } finally {
+      client.release();
+    }
   }
 
   async create(data){
@@ -181,8 +285,12 @@ class Application extends BaseModel {
       return this.formatValidationError(validation);
     }
 
+    const appUrls = this.links.toDbArray(parsedData.app_urls);
+    delete parsedData.app_urls;
+
     const client = await pg.pool.connect();
     try {
+      await client.query('BEGIN');
       let insert, sql, result;
 
       insert = pg.prepareObjectForInsert(parsedData);
@@ -194,6 +302,25 @@ class Application extends BaseModel {
       result = await client.query(sql, insert.values);
       const applicationId = result.rows[0].application_id;
 
+      // insert app urls
+      if ( appUrls.length ){
+        for ( const url of appUrls ){
+          const d = {
+            key: 'app_url',
+            application_id: applicationId,
+            value: url
+          }
+          insert = pg.prepareObjectForInsert(d);
+          sql = `
+            INSERT INTO ${this.metaTable}
+            (${insert.keysString}) VALUES (${insert.placeholdersString})
+          `;
+          await client.query(sql, insert.values);
+        }
+      }
+
+      await client.query('COMMIT');
+
       return { application_id: applicationId };
 
     } catch (error) {
@@ -202,6 +329,24 @@ class Application extends BaseModel {
     } finally {
       client.release();
     }
+  }
+
+  async delete(applicationId){
+    const parsedData = this.entityFields.toDbObj({applicationId});
+    const validation = await this.entityFields.validate(parsedData, { includeFields: ['application_id'] });
+    if ( !validation.valid ) {
+      return this.formatValidationError(validation);
+    }
+
+    let sql = `
+      DELETE FROM ${this.table}
+      WHERE application_id = $1
+    `;
+    const result = await pg.query(sql, [applicationId]);
+    if ( result.error ) {
+      return this.formatError(result.error);
+    }
+    return { applicationId };
   }
 }
 

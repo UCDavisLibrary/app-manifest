@@ -40,6 +40,12 @@ export default class ApplicationTeaser extends Mixin(LitElement)
   _setBadges(){
     const badges = [];
 
+    if ( this.application?.isArchived ){
+      badges.push({text: 'Archived'});
+      this.badges = badges;
+      return;
+    }
+
     if ( this.application?.nextMaintenance ){
       const diffDays = this._getDiffDays(this.application.nextMaintenance);
       if ( diffDays < 0 ){

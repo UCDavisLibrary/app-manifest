@@ -7,8 +7,10 @@ class ApplicationStore extends BaseStore {
 
     this.data = {
       create: new LruStore({name: 'application.create'}),
+      update: new LruStore({name: 'application.update'}),
       query: new LruStore({name: 'application.query'}),
-      get: new LruStore({name: 'application.get'})
+      get: new LruStore({name: 'application.get'}),
+      delete: new LruStore({name: 'application.delete'})
     };
 
     this.events = {};

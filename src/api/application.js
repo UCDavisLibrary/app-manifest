@@ -8,7 +8,7 @@ export default (api) => {
   api.post(basePath, async (req, res) => {
     const result = await applicationModel.create(req.body);
     if ( apiUtils.returnIfModelError(req, res, result, 'Unable to create application record') ) return;
-    res.json(result);
+    res.status(201).json(result);
   });
 
   api.get(basePath, async (req, res) => {
@@ -19,13 +19,28 @@ export default (api) => {
   });
 
   api.get(`${basePath}/:id`, async (req, res) => {
-    if ( apiUtils.returnIfMissingId(res, req.params.id, 'Application does not exist') ) return;
-    const result = await applicationModel.query({applicationId: req.params.id});
+    if ( apiUtils.return404IfMissingId(res, req.params.id, 'Application does not exist') ) return;
+    const result = await applicationModel.query({applicationId: req.params.id, includeArchived: true});
     if ( apiUtils.returnIfModelError(req, res, result, 'Unable to get application record') ) return;
     if ( !result.data.length ) {
       return apiUtils.return404(res, 'Application does not exist');
     }
     res.json(result.data[0]);
+  });
+
+  api.put(`${basePath}/:id`, async (req, res) => {
+    if ( apiUtils.return404IfMissingId(res, req.params.id, 'Application does not exist') ) return;
+    req.body.applicationId = req.params.id;
+    const result = await applicationModel.update(req.body);
+    if ( apiUtils.returnIfModelError(req, res, result, 'Unable to update application record') ) return;
+    res.json(result);
+  });
+
+  api.delete(`${basePath}/:id`, async (req, res) => {
+    if ( apiUtils.return404IfMissingId(res, req.params.id, 'Application does not exist') ) return;
+    const result = await applicationModel.delete(req.params.id);
+    if ( apiUtils.returnIfModelError(req, res, result, 'Unable to delete application record') ) return;
+    res.json(result);
   });
 
 

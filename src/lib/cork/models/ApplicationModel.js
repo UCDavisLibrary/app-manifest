@@ -21,6 +21,14 @@ class ApplicationModel extends BaseModel {
     return this.service.create(data);
   }
 
+  delete(id){
+    return this.service.delete(id);
+  }
+
+  async update(data){
+    return this.service.update(data);
+  }
+
   async query(queryObject={}){
     return await this.service.query(queryObject);
   }

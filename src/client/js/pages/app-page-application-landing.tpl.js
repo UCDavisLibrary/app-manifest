@@ -42,10 +42,10 @@ function renderFilters(){
       <div class='l-3col grid--simple-override'>
         <div class="l-first">
           <div class='field-container'>
-            <label for=${this.igen.get('keyword')}>Keyword</label>
+            <label for=${this.idGen.get('keyword')}>Keyword</label>
             <debounce-input @debounced-input=${e => this.query.set('keyword', e.detail.value)}>
               <input
-                id=${this.igen.get('keyword')}
+                id=${this.idGen.get('keyword')}
                 type='text'
                 .value=${this.query.get('keyword', '')}
                 placeholder='Search...'
@@ -60,6 +60,16 @@ function renderFilters(){
           ${renderSelect.call(this, 'sslExpiration', 'SSL Expiration', selectOptions.sslExpirationIntervals)}
         </div>
       </div>
+      <div class='field-container'>
+        <div class='checkbox'>
+          <input
+            id=${this.idGen.get('includeArchived')}
+            type='checkbox'
+            .checked=${this.query.get('includeArchived')}
+            @input=${e => this.query.toggle('includeArchived')} />
+          <label for=${this.idGen.get('includeArchived')}>Include Archived</label>
+        </div>
+      </div>
     </div>
   `;
 }
@@ -67,8 +77,8 @@ function renderFilters(){
 function renderSelect(prop, label, options){
   return html`
     <div class='field-container'>
-      <label for=${this.igen.get(prop)}>${label}</label>
-      <select id=${this.igen.get(prop)} @input=${e => this.query.set(prop, e.target.value)}>
+      <label for=${this.idGen.get(prop)}>${label}</label>
+      <select id=${this.idGen.get(prop)} @input=${e => this.query.set(prop, e.target.value)}>
         ${options.map(option => html`
           <option value=${option.value} ?selected=${this.query.equals(prop, option.value)}>
             ${option.label}

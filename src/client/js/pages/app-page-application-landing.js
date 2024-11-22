@@ -18,7 +18,7 @@ export default class AppPageApplicationLanding extends Mixin(LitElement)
     super();
     this.render = render.bind(this);
 
-    this.igen = new IdGenerator({pageEle: this});
+    this.idGen = new IdGenerator({pageEle: this});
 
     this.query = new QueryController(this);
 
