@@ -22,7 +22,32 @@ export function render() {
                     ${payload.renderInput({prop: 'label', label: 'Label', obj: url, errorField: `appUrls[${i}].label`})}
                   </div>
                 </div>
+                <div class='flex flex--justify-end'>
+                  ${payload.renderRepeaterDeleteButton({prop: 'appUrls', index: i, label: 'Remove URL'})}
+              </div>
               `)}
+              <div class='flex flex--justify-end u-space-mt--medium'>
+                ${payload.renderRepeaterAddButton({prop: 'appUrls', label: 'Add URL', value: this.getLinkObj()})}
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend>Documentation URLs</legend>
+              ${payload.get('documentationUrls').map((url, i) => html`
+                <div class='l-2col grid--simple-override'>
+                  <div class="l-first">
+                    ${payload.renderInput({prop: 'href', label: 'Link *', obj: url, errorField: `documentationUrls[${i}].href`})}
+                  </div>
+                  <div class='l-second'>
+                    ${payload.renderInput({prop: 'label', label: 'Label', obj: url, errorField: `documentationUrls[${i}].label`})}
+                  </div>
+                </div>
+                <div class='flex flex--justify-end'>
+                  ${payload.renderRepeaterDeleteButton({prop: 'documentationUrls', index: i, label: 'Remove URL'})}
+              </div>
+              `)}
+              <div class='flex flex--justify-end u-space-mt--medium'>
+                ${payload.renderRepeaterAddButton({prop: 'documentationUrls', label: 'Add URL', value: this.getLinkObj()})}
+              </div>
             </fieldset>
             <fieldset>
               <legend>Maintenance Schedule</legend>

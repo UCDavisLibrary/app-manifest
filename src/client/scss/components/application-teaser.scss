@@ -38,6 +38,11 @@ application-teaser {
         text-decoration: underline;
       }
     }
+
+    .icon-buttons {
+      display: flex;
+      gap: .25rem;
+    }
   }
 
   .teaser-body{

@@ -69,7 +69,14 @@ class Application extends BaseModel {
         dbName: 'app_urls',
         validation: {
           type: 'array',
-          custom: this.validations.appUrls.bind(this.validations)
+          custom: this.validations.links.bind(this.validations)
+        }
+      },
+      {
+        dbName: 'documentation_urls',
+        validation: {
+          type: 'array',
+          custom: this.validations.links.bind(this.validations)
         }
       }
     ]);
@@ -131,6 +138,11 @@ class Application extends BaseModel {
         }
       }
     ]);
+
+    this.linkArrays = [
+      {key: 'app_url', jsonName: 'appUrls', dbName: 'app_urls'},
+      {key: 'documentation_url', jsonName: 'documentationUrls', dbName: 'documentation_urls'}
+    ]
   }
 
   async query(queryObject={}){
@@ -150,11 +162,11 @@ class Application extends BaseModel {
     if ( queryObject.keyword ){
       whereArgs.keyword = {
         relation: 'OR',
-        name: {
+        'a.name': {
           operator: 'ILIKE',
           value: `%${queryObject.keyword}%`
         },
-        description: {
+        'a.description': {
           operator: 'ILIKE',
           value: `%${queryObject.keyword}%`
         }
@@ -162,11 +174,11 @@ class Application extends BaseModel {
     }
 
     if ( queryObject.applicationId ){
-      whereArgs.application_id = queryObject.applicationId;
+      whereArgs['a.application_id'] = queryObject.applicationId;
     }
 
     if ( !queryObject.includeArchived ){
-      whereArgs.is_archived = false;
+      whereArgs['a.is_archived'] = false;
     }
 
     const whereClause = pg.toWhereClause(whereArgs);
@@ -174,14 +186,14 @@ class Application extends BaseModel {
     if ( queryObject.nextMaintenance ){
       const interval = selectOptions.maintenanceIntervals.find(interval => interval.value === queryObject.nextMaintenance);
       if ( interval.sql ) {
-        whereClause.sql += ` AND next_maintenance ${interval.sql.operator} ${interval.sql.value}`;
+        whereClause.sql += ` AND a.next_maintenance ${interval.sql.operator} ${interval.sql.value}`;
       }
     }
 
     if ( queryObject.sslExpiration ){
       const interval = selectOptions.sslExpirationIntervals.find(interval => interval.value === queryObject.sslExpiration);
       if ( interval.sql ) {
-        whereClause.sql += ` AND ssl_cert_expiration ${interval.sql.operator} ${interval.sql.value}`;
+        whereClause.sql += ` AND a.ssl_cert_expiration ${interval.sql.operator} ${interval.sql.value}`;
       }
     }
 
@@ -233,7 +245,9 @@ class Application extends BaseModel {
 
     data = this.entityFields.toJsonObj(data);
 
-    data.appUrls = this.links.toJsonArray( metadata.filter(d => d.key === 'app_url').map(d => d.value) );
+    for ( const link of this.linkArrays ){
+      data[link.jsonName] = this.links.toJsonArray( metadata.filter(d => d.key === link.key).map(d => d.value) );
+    }
 
     const dates = ['nextMaintenance', 'sslCertExpiration'];
     for ( let date of dates ){
@@ -253,6 +267,8 @@ class Application extends BaseModel {
     const applicationId = parsedData.application_id;
     delete parsedData.application_id;
 
+    const links = this.getLinksFromPayload(parsedData);
+
     const client = await pg.pool.connect();
     try {
       await client.query('BEGIN');
@@ -265,6 +281,18 @@ class Application extends BaseModel {
         WHERE application_id = $${update.values.length + 1}
       `;
       result = await client.query(sql, [...update.values, applicationId]);
+
+      // delete existing links
+      sql = `
+        DELETE FROM ${this.metaTable}
+        WHERE application_id = $1
+        AND key IN (${this.linkArrays.map(link => `'${link.key}'`).join(',')})
+      `;
+
+      await client.query(sql, [applicationId]);
+
+      // insert links into metadata table
+      await this.insertLinks(applicationId, links, client);
 
       await client.query('COMMIT');
       return { application_id: applicationId };
@@ -285,8 +313,7 @@ class Application extends BaseModel {
       return this.formatValidationError(validation);
     }
 
-    const appUrls = this.links.toDbArray(parsedData.app_urls);
-    delete parsedData.app_urls;
+    const links = this.getLinksFromPayload(parsedData);
 
     const client = await pg.pool.connect();
     try {
@@ -302,22 +329,8 @@ class Application extends BaseModel {
       result = await client.query(sql, insert.values);
       const applicationId = result.rows[0].application_id;
 
-      // insert app urls
-      if ( appUrls.length ){
-        for ( const url of appUrls ){
-          const d = {
-            key: 'app_url',
-            application_id: applicationId,
-            value: url
-          }
-          insert = pg.prepareObjectForInsert(d);
-          sql = `
-            INSERT INTO ${this.metaTable}
-            (${insert.keysString}) VALUES (${insert.placeholdersString})
-          `;
-          await client.query(sql, insert.values);
-        }
-      }
+      // insert links into metadata table
+      await this.insertLinks(applicationId, links, client);
 
       await client.query('COMMIT');
 
@@ -329,6 +342,36 @@ class Application extends BaseModel {
     } finally {
       client.release();
     }
+  }
+
+  async insertLinks(applicationId, links, client){
+    for ( const link of links ){
+      for ( const value of link.value ){
+        const d = {
+          key: link.key,
+          application_id: applicationId,
+          value
+        }
+        const insert = pg.prepareObjectForInsert(d);
+        const sql = `
+          INSERT INTO ${this.metaTable}
+          (${insert.keysString}) VALUES (${insert.placeholdersString})
+        `;
+        await client.query(sql, insert.values);
+      }
+    }
+  }
+
+  getLinksFromPayload(parsedData){
+    const links = [];
+    for ( const link of this.linkArrays ){
+      links.push({
+        key: link.key,
+        value: this.links.toDbArray(parsedData[link.dbName])
+      })
+      delete parsedData[link.dbName];
+    }
+    return links;
   }
 
   async delete(applicationId){

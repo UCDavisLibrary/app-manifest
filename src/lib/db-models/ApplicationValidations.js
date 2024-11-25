@@ -18,7 +18,7 @@ export default class ApplicationValidations {
     }
   }
 
-  async appUrls(field, value, validator){
+  async links(field, value, validator){
     for ( const [i, url] of value.entries() ) {
       const validation = await this.model.links.validate(url);
       if ( !validation.valid ) {

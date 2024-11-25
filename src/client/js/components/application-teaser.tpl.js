@@ -1,4 +1,5 @@
 import { html } from 'lit';
+import './link-icon-button.js';
 
 export function render() {
 return html`
@@ -10,6 +11,10 @@ return html`
   <div class='title-row'>
     <div class='title'>
       <a href=${this.pageUrl}><h2 class='heading--highlight'>${this.application.name}</h2></a>
+    </div>
+    <div class='icon-buttons'>
+      <link-icon-button icon='link' .links=${this.application.appUrls}></link-icon-button>
+      <link-icon-button icon='book' .links=${this.application.documentationUrls}></link-icon-button>
     </div>
   </div>
   <div class='teaser-body'>

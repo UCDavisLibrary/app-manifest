@@ -26,10 +26,18 @@ export default class AppPageApplicationRegister extends Mixin(LitElement)
     ]
     const ctlPayloadConfig = {
       defaults: {
-        appUrls: [{href: '', label: ''}]
+        appUrls: [this.getLinkObj()],
+        documentationUrls: [this.getLinkObj()]
       }
     };
     this.application = new CorkModelController(this, 'ApplicationModel', ctlPropMapper, ctlPayloadConfig);
+  }
+
+  getLinkObj(){
+    return {
+      href: '',
+      label: ''
+    }
   }
 
   async _onAppStateUpdate(state) {
